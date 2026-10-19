@@ -1,0 +1,526 @@
+/* WAVault dashboard. Lives in a Shadow DOM, so nothing here touches WhatsApp's own styles. */
+
+.wv-root {
+  --paper: #f4f7f6;
+  --card: #ffffff;
+  --ink: #17292c;
+  --muted: #5b6e6b;
+  --line: #d3ddda;
+  --line-soft: #e6edeb;
+  --head: #eef3f1;
+  --jade: #0f7b68;
+  --jade-strong: #0b6455;
+  --jade-soft: #ddefea;
+  --on-jade: #ffffff;
+  --amber: #e0a21b;
+  --amber-soft: #fbefd2;
+  --amber-ink: #7a5300;
+  --red: #b3261e;
+  --red-soft: #f9dedc;
+  --rail: #17292c;
+  --rail-ink: #e6eeec;
+  --rail-muted: #93a9a5;
+  --shadow: 0 12px 32px rgba(16, 33, 31, 0.18);
+  --display: 'WAVault Display', ui-sans-serif, system-ui, sans-serif;
+  --body: system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans', 'Noto Sans Bengali', 'Apple Color Emoji', 'Segoe UI Emoji', sans-serif;
+
+  font: 14px/1.4 var(--body);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+.wv-root[data-theme='dark'] {
+  --paper: #10211f;
+  --card: #173030;
+  --ink: #e6eeec;
+  --muted: #93a9a5;
+  --line: #2a4442;
+  --line-soft: #213a38;
+  --head: #1b3735;
+  --jade: #2fb39a;
+  --jade-strong: #45c7ae;
+  --jade-soft: #1c4740;
+  --on-jade: #06201b;
+  --amber: #e8b33a;
+  --amber-soft: #4a3a12;
+  --amber-ink: #f3d27f;
+  --red: #f2b8b5;
+  --red-soft: #5c1d1a;
+  --rail: #0a1615;
+  --shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+  color-scheme: dark;
+}
+
+.wv-root *,
+.wv-root *::before,
+.wv-root *::after {
+  box-sizing: border-box;
+}
+
+.wv-root * {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+}
+
+.wv-root button,
+.wv-root input,
+.wv-root select {
+  font: inherit;
+  color: inherit;
+}
+
+.wv-root :focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
+.wv-root h2,
+.wv-root h3,
+.wv-root p {
+  margin: 0;
+}
+
+.wv-muted { color: var(--muted); }
+.wv-small { font-size: 12.5px; }
+.wv-block { display: block; }
+.wv-num { font-variant-numeric: tabular-nums; }
+.wv-clip { display: block; overflow: hidden; text-overflow: ellipsis; }
+.wv-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ---------- launcher: a folder tab on the right edge of WhatsApp ---------- */
+
+.wv-launcher {
+  position: fixed;
+  right: 0;
+  top: 46%;
+  z-index: 2147483000;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 52px;
+  padding: 0 0 0 4px;
+  border: 1px solid var(--line);
+  border-right: 0;
+  border-radius: 12px 0 0 12px;
+  background: var(--card);
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  transition: width 0.15s ease;
+}
+.wv-launcher:hover { width: 52px; }
+
+/* ---------- overlay shell ---------- */
+
+.wv-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  display: grid;
+  grid-template-columns: 196px minmax(0, 1fr);
+  background: var(--rail);
+}
+
+.wv-rail {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 18px 0 16px 14px;
+  color: var(--rail-ink);
+  min-height: 0;
+}
+
+.wv-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-right: 14px;
+  font: 700 21px/1 var(--display);
+  letter-spacing: -0.01em;
+}
+
+/* Folder tabs: the active tab joins the paper of the main panel. */
+.wv-tabs { display: flex; flex-direction: column; gap: 4px; }
+.wv-tabs button {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  padding: 11px 16px 11px 14px;
+  border: 0;
+  border-radius: 12px 0 0 12px;
+  background: transparent;
+  color: var(--rail-muted);
+  font: 600 15px/1.2 var(--display);
+  text-align: left;
+  cursor: pointer;
+}
+.wv-tabs button:hover { color: var(--rail-ink); background: rgba(255, 255, 255, 0.06); }
+.wv-tabs button.on { background: var(--paper); color: var(--ink); }
+.wv-tabs button .wv-num { font: 500 12.5px var(--body); opacity: 0.8; }
+.wv-tabs button.on .wv-num { color: var(--jade); opacity: 1; }
+
+.wv-rail-foot { margin-top: auto; display: flex; flex-direction: column; gap: 2px; padding-right: 14px; }
+.wv-rail-foot small { padding: 6px 10px 0; color: var(--rail-muted); font-size: 11.5px; }
+.wv-rail-btn {
+  width: 100%;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--rail-ink);
+  text-align: left;
+  cursor: pointer;
+}
+.wv-rail-btn:hover { background: rgba(255, 255, 255, 0.08); }
+.wv-rail-btn:disabled { opacity: 0.6; cursor: default; }
+.wv-settings { position: relative; }
+
+.wv-main {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  padding: 22px 26px 0;
+  background: var(--paper);
+  color: var(--ink);
+  border-radius: 16px 0 0 16px;
+}
+
+.wv-view { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+
+.wv-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.wv-title h2 { font: 650 26px/1.1 var(--display); letter-spacing: -0.015em; }
+.wv-title p { display: flex; align-items: baseline; gap: 10px; margin-top: 6px; }
+.wv-bignum {
+  font: 700 46px/0.95 var(--display);
+  letter-spacing: -0.03em;
+  color: var(--jade);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- inputs & buttons ---------- */
+
+.wv-input {
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--card);
+  min-width: 0;
+}
+.wv-input:focus { border-color: var(--jade); outline: none; box-shadow: 0 0 0 3px var(--jade-soft); }
+.wv-search { width: min(380px, 100%); }
+select.wv-input { padding-right: 28px; }
+
+.wv-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--card);
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.wv-btn:hover:not(:disabled) { border-color: var(--jade); }
+.wv-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.wv-btn-quiet { background: transparent; }
+.wv-btn-active { border-color: var(--jade); color: var(--jade); }
+.wv-btn-primary { background: var(--jade); border-color: var(--jade); color: var(--on-jade); padding: 0 18px; }
+.wv-btn-primary:hover:not(:disabled) { background: var(--jade-strong); border-color: var(--jade-strong); }
+
+.wv-link {
+  border: 0;
+  padding: 0;
+  background: none;
+  color: var(--jade);
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.wv-link:disabled { color: var(--muted); cursor: not-allowed; text-decoration: none; }
+
+.wv-count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  background: var(--amber);
+  color: #2a1d00;
+  font-size: 11.5px;
+  font-weight: 700;
+}
+
+.wv-check { display: flex; align-items: flex-start; gap: 8px; padding: 5px 2px; cursor: pointer; }
+.wv-check input { margin: 2px 0 0; accent-color: var(--jade); width: 16px; height: 16px; flex: none; }
+.wv-check > span:first-of-type { flex: 1; }
+.wv-check-inline { align-items: center; padding: 0 4px; }
+.wv-check-inline input { margin: 0; }
+.wv-field { display: grid; gap: 4px; margin-top: 8px; font-size: 12.5px; color: var(--muted); }
+.wv-field .wv-input { color: var(--ink); font-size: 14px; }
+
+.wv-seg { display: inline-flex; padding: 3px; border-radius: 10px; background: var(--line-soft); }
+.wv-seg button { padding: 5px 12px; border: 0; border-radius: 7px; background: transparent; font-weight: 600; cursor: pointer; }
+.wv-seg button.on { background: var(--card); color: var(--jade); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12); }
+.wv-seg button:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.wv-badges { display: flex; gap: 4px; flex-wrap: wrap; }
+.wv-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--line-soft);
+  color: var(--muted);
+  font-size: 11.5px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.wv-badge-jade { background: var(--jade-soft); color: var(--jade); }
+.wv-badge-amber { background: var(--amber-soft); color: var(--amber-ink); }
+.wv-badge-red { background: var(--red-soft); color: var(--red); }
+
+.wv-note {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+  padding: 8px 8px 8px 14px;
+  border-radius: 10px;
+  background: var(--amber-soft);
+  color: var(--amber-ink);
+}
+
+/* ---------- popovers ---------- */
+
+.wv-pick { position: relative; }
+.wv-pop {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 20;
+  display: grid;
+  gap: 6px;
+  width: 280px;
+  max-height: 360px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--card);
+  box-shadow: var(--shadow);
+}
+.wv-pop-up { top: auto; bottom: calc(100% + 6px); left: 0; color: var(--ink); }
+.wv-pop-list { overflow: auto; max-height: 260px; }
+.wv-pop .wv-check span:last-child.wv-num { flex: none; }
+.wv-dock .wv-pop { top: auto; bottom: calc(100% + 6px); right: 0; left: auto; }
+
+/* ---------- list layout ---------- */
+
+.wv-split {
+  display: grid;
+  grid-template-columns: 216px minmax(0, 1fr);
+  gap: 18px;
+  flex: 1;
+  min-height: 0;
+}
+.wv-split:has(> .wv-options) { grid-template-columns: 216px minmax(0, 1fr) 236px; }
+
+.wv-presets { display: flex; flex-direction: column; gap: 1px; overflow: auto; padding-right: 4px; }
+.wv-presets button {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px 8px 12px;
+  border: 0;
+  border-left: 3px solid transparent;
+  border-radius: 0 8px 8px 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+.wv-presets button:hover { background: var(--line-soft); }
+.wv-presets button.on { border-left-color: var(--amber); background: var(--jade-soft); color: var(--jade); font-weight: 600; }
+.wv-presets button .wv-num { color: var(--muted); }
+.wv-presets button.on .wv-num { color: inherit; }
+.wv-presets-extra { padding: 10px 0 0 12px; }
+
+.wv-tablecol { display: flex; flex-direction: column; gap: 10px; min-width: 0; min-height: 0; }
+.wv-tablecol-full { flex: 1; }
+.wv-toolbar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+.wv-refine {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 6px 18px;
+  padding: 10px 12px;
+  border: 1px dashed var(--line);
+  border-radius: 12px;
+}
+.wv-tri { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.wv-tri-label { font-size: 13px; }
+.wv-tri-opts { display: inline-flex; padding: 2px; border-radius: 8px; background: var(--line-soft); }
+.wv-tri-opts button { padding: 2px 9px; border: 0; border-radius: 6px; background: transparent; font-size: 12.5px; cursor: pointer; }
+.wv-tri-opts button.on { background: var(--card); color: var(--jade); font-weight: 700; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12); }
+
+/* ---------- table ---------- */
+
+.wv-table {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 220px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--card);
+  overflow: hidden;
+}
+.wv-tr { display: grid; align-items: center; }
+.wv-tbody .wv-tr { position: absolute; left: 0; right: 0; top: 0; border-bottom: 1px solid var(--line-soft); }
+.wv-tbody .wv-tr:hover { background: var(--head); }
+.wv-tr-on, .wv-tbody .wv-tr-on:hover { background: var(--jade-soft); }
+.wv-th { height: 40px; flex: none; border-bottom: 1px solid var(--line); background: var(--head); color: var(--muted); font-size: 12.5px; font-weight: 600; }
+.wv-tbody { flex: 1; overflow: auto; position: relative; }
+.wv-td { min-width: 0; padding: 0 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wv-td-check { display: grid; place-items: center; padding: 0; }
+.wv-td-check input { width: 16px; height: 16px; accent-color: var(--jade); }
+.wv-empty { padding: 48px 16px; text-align: center; color: var(--muted); }
+.wv-empty-big p:first-child { font: 600 18px var(--display); color: var(--ink); margin-bottom: 6px; }
+
+.wv-namecell { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.wv-avatar {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--jade-soft);
+  color: var(--jade);
+  font: 700 14px var(--display);
+}
+.wv-namecell-text { display: grid; min-width: 0; line-height: 1.25; }
+.wv-namecell-text strong, .wv-namecell-text small { overflow: hidden; text-overflow: ellipsis; }
+.wv-namecell-text strong { font-weight: 600; }
+.wv-namecell-text small { color: var(--muted); font-size: 12px; }
+
+/* ---------- chat options ---------- */
+
+.wv-options { overflow: auto; display: grid; gap: 14px; align-content: start; padding-bottom: 8px; }
+.wv-options fieldset { margin: 0; padding: 0; border: 0; display: grid; gap: 2px; }
+.wv-options legend { padding: 0; margin-bottom: 4px; font: 650 15px var(--display); }
+.wv-options select.wv-input, .wv-options input[type='date'] { width: 100%; margin-top: 4px; }
+
+/* ---------- dock ---------- */
+
+.wv-dock {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+  padding: 12px 0 16px;
+  border-top: 1px solid var(--line);
+}
+.wv-dock-scope, .wv-dock-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.wv-dock-actions .wv-pick { position: relative; }
+.wv-select select {
+  height: 36px;
+  max-width: 240px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--card);
+}
+
+/* ---------- status ---------- */
+
+.wv-status-scroll { flex: 1; min-height: 0; overflow: auto; padding-right: 4px; display: flex; flex-wrap: wrap; align-content: flex-start; gap: 6px 32px; }
+.wv-status-scroll > .wv-note, .wv-status-scroll > .wv-empty { flex-basis: 100%; }
+.wv-status-group { margin-bottom: 16px; }
+.wv-status-group h3 { font: 650 17px var(--display); margin-bottom: 10px; }
+.wv-status-group h3 .wv-muted { font: 400 13px var(--body); margin-left: 6px; }
+.wv-status-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+.wv-status-grid > .wv-status-card { width: 128px; }
+.wv-status-card { margin: 0; border: 2px solid transparent; border-radius: 12px; background: var(--card); overflow: hidden; }
+.wv-status-card.on { border-color: var(--amber); }
+.wv-status-thumb { position: relative; display: block; width: 100%; aspect-ratio: 9 / 14; padding: 0; border: 0; background: var(--rail); cursor: pointer; }
+.wv-status-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.wv-status-text {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  padding: 12px;
+  background: var(--jade);
+  color: #fff;
+  font-size: 13.5px;
+  text-align: center;
+  white-space: pre-wrap;
+  overflow: hidden;
+}
+.wv-status-type { position: absolute; left: 8px; top: 8px; padding: 1px 7px; border-radius: 999px; background: rgba(10, 22, 21, 0.72); color: #fff; font-size: 11px; font-weight: 600; }
+.wv-status-card figcaption { display: flex; align-items: baseline; justify-content: space-between; gap: 6px; padding: 6px 9px; font-size: 12.5px; white-space: nowrap; }
+
+/* ---------- waiting & modal ---------- */
+
+.wv-waiting { margin: auto; display: grid; justify-items: center; gap: 8px; text-align: center; max-width: 440px; }
+.wv-waiting h2 { font: 650 22px var(--display); }
+.wv-spinner { width: 34px; height: 34px; border-radius: 50%; border: 3px solid var(--line); border-top-color: var(--jade); animation: wv-spin 0.9s linear infinite; }
+@keyframes wv-spin { to { transform: rotate(360deg); } }
+
+.wv-modal-backdrop { position: absolute; inset: 0; z-index: 30; display: grid; place-items: center; background: rgba(10, 22, 21, 0.5); }
+.wv-modal { width: min(500px, 92%); padding: 24px; border-radius: 16px; background: var(--card); box-shadow: var(--shadow); }
+.wv-modal h3 { font: 650 20px var(--display); margin: 0 0 14px; }
+.wv-progress { height: 8px; border-radius: 4px; background: var(--line-soft); overflow: hidden; }
+.wv-progress span { display: block; height: 100%; background: var(--jade); transition: width 0.3s ease; }
+.wv-job-lines { display: grid; gap: 6px; margin: 14px 0 4px; }
+.wv-job-lines p:first-child { font-weight: 600; overflow-wrap: anywhere; }
+.wv-modal-actions { display: flex; justify-content: flex-end; margin-top: 18px; }
+
+/* ---------- toasts ---------- */
+
+.wv-toasts { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 2147483001; display: grid; gap: 8px; width: min(560px, 92vw); }
+.wv-toast { padding: 11px 16px; border-radius: 10px; background: var(--rail); color: var(--rail-ink); box-shadow: var(--shadow); overflow-wrap: anywhere; }
+.wv-toast-error { background: var(--red-soft); color: var(--red); border: 1px solid var(--red); }
+
+/* ---------- small screens ---------- */
+
+@media (max-width: 1100px) {
+  .wv-split:has(> .wv-options) { grid-template-columns: 200px minmax(0, 1fr); }
+  .wv-split > .wv-options { grid-column: 1 / -1; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); max-height: 220px; }
+}
+
+@media (max-width: 820px) {
+  .wv-overlay { grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr); }
+  .wv-rail { flex-direction: row; align-items: center; gap: 10px; padding: 10px 12px 0; overflow-x: auto; }
+  .wv-brand span { display: none; }
+  .wv-tabs { flex-direction: row; }
+  .wv-tabs button { border-radius: 12px 12px 0 0; padding: 10px 12px; }
+  .wv-rail-foot { flex-direction: row; margin: 0 0 0 auto; padding: 0; }
+  .wv-rail-foot small { display: none; }
+  .wv-main { border-radius: 0; padding: 16px 16px 0; }
+  .wv-split, .wv-split:has(> .wv-options) { grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr); }
+  .wv-presets { flex-direction: row; overflow-x: auto; padding-bottom: 4px; }
+  .wv-presets button { flex: none; border-left: 0; border-bottom: 3px solid transparent; border-radius: 8px 8px 0 0; }
+  .wv-presets button.on { border-bottom-color: var(--amber); }
+  .wv-bignum { font-size: 36px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wv-root * { transition: none !important; animation-duration: 0.01ms !important; }
+}

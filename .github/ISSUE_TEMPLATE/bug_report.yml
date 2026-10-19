@@ -1,0 +1,55 @@
+name: Bug report
+description: Something in WAVault does not work as expected.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. **Please do not include phone numbers, names, chat text or screenshots with real contacts.**
+        Check [Troubleshooting](https://github.com/md8-habibullah/wavault-whatsapp-web-backup/blob/main/docs/troubleshooting.md) first.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What you did, what you expected, and what happened instead.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Which part?
+      options: [Contacts, Groups, Chat backup, Status, Export file, Install / loading, Other]
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and version
+      placeholder: Chrome 141, Firefox 144, Edge 141, Safari 26…
+    validations:
+      required: true
+  - type: input
+    id: wavault
+    attributes:
+      label: WAVault version
+      description: Shown on your browser's extensions page.
+      placeholder: 1.0.0
+    validations:
+      required: true
+  - type: input
+    id: whatsapp
+    attributes:
+      label: WhatsApp Web version
+      description: Shown at the bottom of the WAVault rail.
+      placeholder: 2.3000.1050814928
+  - type: dropdown
+    id: account
+    attributes:
+      label: Account type
+      options: [WhatsApp, WhatsApp Business]
+  - type: textarea
+    id: console
+    attributes:
+      label: Console errors
+      description: F12 → Console. Paste red errors that mention WAVault or wa-bridge. Remove any personal data.
+      render: text

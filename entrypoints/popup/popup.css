@@ -1,0 +1,39 @@
+@font-face {
+  font-family: 'WAVault Display';
+  src: url('/fonts/bricolage-grotesque-latin-wght-normal.woff2') format('woff2');
+  font-weight: 200 800;
+}
+:root {
+  --paper: #f4f7f6;
+  --ink: #17292c;
+  --muted: #5b6e6b;
+  --line: #d3ddda;
+  --jade: #0f7b68;
+  --amber: #e0a21b;
+  --card: #ffffff;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #10211f;
+    --ink: #e6eeec;
+    --muted: #93a9a5;
+    --line: #2a4442;
+    --jade: #2fb39a;
+    --card: #173030;
+    color-scheme: dark;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; width: 300px; background: var(--paper); color: var(--ink); font: 14px/1.4 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
+main { padding: 16px; }
+header { display: flex; gap: 12px; align-items: center; margin-bottom: 14px; }
+h1 { margin: 0; font: 650 22px/1.1 'WAVault Display', system-ui, sans-serif; letter-spacing: -0.01em; }
+header p { margin: 2px 0 0; color: var(--muted); font-size: 12.5px; }
+nav { display: grid; gap: 6px; }
+nav button { display: grid; text-align: left; gap: 1px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--card); color: inherit; font: inherit; cursor: pointer; }
+nav button span { font-weight: 600; }
+nav button small { color: var(--muted); }
+nav button:hover { border-color: var(--jade); }
+nav button:focus-visible { outline: 2px solid var(--amber); outline-offset: 1px; }
+footer { margin-top: 12px; color: var(--muted); font-size: 12px; }

@@ -1,0 +1,10 @@
+node_modules
+.output
+.wxt
+.e2e-profile
+e2e-output
+*.log
+.env*
+.DS_Store
+Thumbs.db
+.site

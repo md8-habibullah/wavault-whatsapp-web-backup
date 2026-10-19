@@ -1,0 +1,36 @@
+<!doctype html>
+<!-- Source of docs/images/social-preview.png (1280×640). Rendered by `npm run screenshots`. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>WAVault social preview</title>
+<style>
+@font-face { font-family: "WAVault Display"; src: url("../public/fonts/bricolage-grotesque-latin-wght-normal.woff2") format("woff2"); font-weight: 200 800; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1280px; height: 640px; overflow: hidden; }
+body { display: grid; grid-template-columns: 112px 1fr; background: #F4F7F6; color: #17292C; font-family: ui-sans-serif, system-ui, sans-serif; }
+.rail { background: #18292B; display: flex; flex-direction: column; align-items: center; padding-top: 40px; gap: 26px; }
+.rail img { width: 56px; height: 56px; }
+.rail span { width: 46px; height: 8px; border-radius: 4px; background: #2C4240; }
+.rail span.on { background: #F4F7F6; width: 58px; margin-right: -12px; border-radius: 4px 0 0 4px; }
+main { position: relative; padding: 56px 0 0 64px; }
+.name { font: 700 34px "WAVault Display", sans-serif; color: #0F7B68; }
+h1 { margin: 14px 0 0; font: 750 60px/1.02 "WAVault Display", sans-serif; letter-spacing: -0.02em; max-width: 10ch; }
+p { margin: 22px 0 0; font-size: 23px; color: #56696B; max-width: 32ch; line-height: 1.35; }
+.chips { position: absolute; left: 64px; bottom: 48px; display: flex; gap: 10px; }
+.chips b { padding: 8px 16px; border-radius: 999px; background: #fff; border: 2px solid #D3DDDA; font-size: 19px; font-weight: 600; }
+.chips b:first-child { background: #0F7B68; border-color: #0F7B68; color: #fff; }
+.shot { position: absolute; right: -250px; top: 56px; width: 760px; border-radius: 14px; border: 1px solid #D3DDDA; box-shadow: 0 30px 60px -30px rgba(15, 50, 45, .5); }
+</style>
+</head>
+<body>
+  <aside class="rail"><img src="../assets/icon.svg" alt=""><span class="on"></span><span></span><span></span><span></span></aside>
+  <main>
+    <div class="name">WAVault</div>
+    <h1>Export WhatsApp contacts, groups and chats</h1>
+    <p>Free, open-source browser extension. Nothing leaves your computer.</p>
+    <img class="shot" src="../docs/images/contacts-filters.png" alt="">
+    <div class="chips"><b>Excel</b><b>CSV</b><b>vCard</b><b>Google</b><b>Outlook</b><b>PDF</b></div>
+  </main>
+</body>
+</html>
