@@ -5,7 +5,7 @@ import { resolve } from 'node:path';
 
 const root = resolve(import.meta.dirname, '..');
 const out = resolve(root, '.site');
-const SITE_URL = 'https://md8-habibullah.github.io/wavault-whatsapp-web-backup/';
+const SITE_URL = 'https://wavault.habibullah.dev/';
 
 rmSync(out, { recursive: true, force: true });
 mkdirSync(out, { recursive: true });

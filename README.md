@@ -24,7 +24,7 @@ back up full chats with photos and voice notes, and save statuses. Everything ru
 [Install guide](docs/install.md) ·
 [User guide](docs/README.md) ·
 [FAQ](docs/faq.md) ·
-[Website](https://md8-habibullah.github.io/wavault-whatsapp-web-backup/)
+[Website](https://wavault.habibullah.dev/)
 
 <img src="docs/images/demo.gif" width="860" alt="WAVault demo: filtering WhatsApp contacts, loading group members, backing up chats and saving statuses">
 
