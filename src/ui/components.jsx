@@ -1,3 +1,4 @@
+import { useI18n } from './i18n.js';
 import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
 // ---------- toasts ----------
@@ -38,10 +39,11 @@ export function Badge({ tone = 'plain', children, title }) {
 
 /** Any / Yes / No switch for one facet. */
 export function TriState({ label, value, onChange }) {
+  const { t } = useI18n();
   const opts = [
-    ['any', 'Any'],
-    ['yes', 'Yes'],
-    ['no', 'No'],
+    ['any', t('Any')],
+    ['yes', t('Yes')],
+    ['no', t('No')],
   ];
   return (
     <div className="wv-tri" role="radiogroup" aria-label={label}>
@@ -59,6 +61,7 @@ export function TriState({ label, value, onChange }) {
 
 /** Dropdown checklist with its own search (groups, labels, columns). */
 export function MultiPick({ label, options, value, onChange, emptyText = 'Nothing to choose from yet.' }) {
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState('');
   const ref = useRef(null);
@@ -86,9 +89,9 @@ export function MultiPick({ label, options, value, onChange, emptyText = 'Nothin
               setOpen(false);
             }
           }}>
-          {options.length > 8 && <input className="wv-input" type="search" placeholder={`Search ${label.toLowerCase()}`} value={q} onChange={(e) => setQ(e.target.value)} autoFocus />}
+          {options.length > 8 && <input className="wv-input" type="search" placeholder={t`Search ${label.toLowerCase()}`} value={q} onChange={(e) => setQ(e.target.value)} autoFocus />}
           <div className="wv-pop-list">
-            {!options.length && <p className="wv-muted">{emptyText}</p>}
+            {!options.length && <p className="wv-muted">{t(emptyText)}</p>}
             {shown.map((o) => (
               <label key={o.value} className="wv-check">
                 <input type="checkbox" checked={set.has(o.value)} onChange={() => onChange(set.has(o.value) ? value.filter((v) => v !== o.value) : [...value, o.value])} />
@@ -99,7 +102,7 @@ export function MultiPick({ label, options, value, onChange, emptyText = 'Nothin
           </div>
           {value.length > 0 && (
             <button type="button" className="wv-link" onClick={() => onChange([])}>
-              Clear selection
+              {t('Clear selection')}
             </button>
           )}
         </div>
@@ -121,6 +124,7 @@ export const Chevron = () => (
  * columns: [{ id, label, width (CSS grid track), render(row) }]
  */
 export function VirtualTable({ rows, columns, rowKey, selected, onToggle, onToggleMany, rowHeight = 52, empty, label }) {
+  const { t } = useI18n();
   const ref = useRef(null);
   const [scrollTop, setScrollTop] = useState(0);
   const [height, setHeight] = useState(400);
@@ -153,7 +157,7 @@ export function VirtualTable({ rows, columns, rowKey, selected, onToggle, onTogg
         <div role="columnheader" className="wv-td wv-td-check">
           <input
             type="checkbox"
-            aria-label={allOn ? 'Unselect all rows' : 'Select all rows'}
+            aria-label={allOn ? t('Unselect all rows') : t('Select all rows')}
             checked={allOn}
             ref={(el) => {
               if (el) el.indeterminate = selectedHere > 0 && !allOn;
@@ -163,7 +167,7 @@ export function VirtualTable({ rows, columns, rowKey, selected, onToggle, onTogg
         </div>
         {columns.map((c) => (
           <div key={c.id} role="columnheader" className="wv-td">
-            {c.label}
+            {t(c.label)}
           </div>
         ))}
       </div>
@@ -183,7 +187,7 @@ export function VirtualTable({ rows, columns, rowKey, selected, onToggle, onTogg
                 style={{ gridTemplateColumns: template, height: rowHeight, transform: `translateY(${(start + i) * rowHeight}px)` }}
               >
                 <div role="cell" className="wv-td wv-td-check">
-                  <input type="checkbox" aria-label="Select row" checked={on} onChange={() => onToggle(k)} />
+                  <input type="checkbox" aria-label={t('Select row')} checked={on} onChange={() => onToggle(k)} />
                 </div>
                 {columns.map((c) => (
                   <div key={c.id} role="cell" className={`wv-td ${c.className || ''}`}>
@@ -202,6 +206,7 @@ export function VirtualTable({ rows, columns, rowKey, selected, onToggle, onTogg
 // ---------- job progress ----------
 
 export function JobPanel({ title, lines, percent, onCancel, done, onClose, children }) {
+  const { t } = useI18n();
   return (
     <div className="wv-modal-backdrop">
       <div className="wv-modal" role="dialog" aria-modal="true" aria-label={title}>
@@ -220,11 +225,11 @@ export function JobPanel({ title, lines, percent, onCancel, done, onClose, child
         <div className="wv-modal-actions">
           {done ? (
             <button type="button" className="wv-btn wv-btn-primary" onClick={onClose} autoFocus>
-              Done
+              {t('Done')}
             </button>
           ) : (
             <button type="button" className="wv-btn" onClick={onCancel}>
-              Stop
+              {t('Stop')}
             </button>
           )}
         </div>
