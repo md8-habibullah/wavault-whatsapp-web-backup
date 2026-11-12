@@ -53,5 +53,20 @@ Add a writer in `src/lib/export/`, register it in `FORMATS` in `src/lib/export/i
 
 ## Translations
 
-The interface is in English for now. If you want to translate it (Bangla, Hindi, Arabic, Spanish, Portuguese,
-Indonesian, …), open an issue first so we can set up the message files together.
+The dashboard and popup support English and Simplified Chinese. Settings → Language can override the browser
+language without reloading. English source messages are the fallback; the Chinese catalog is in
+`src/ui/locales/zh-CN.js`, and the provider/formatters are in `src/ui/i18n.js`.
+
+Use `t('Settings')` for a fixed UI message or a tagged template, for example
+``t`Saved ${filename}`` (catalog key `Saved {0}`). Keep interpolation slots intact, and translate complete
+phrases when word order differs. Only translate static interface labels at their render sites: never pass
+contact names, custom labels, group names or message text to `t`, and do not localize export schemas or business
+identifiers. Date/count formatting is for display, not exported data.
+
+Run `npm test` and `npm run build:all`. To exercise the language setting, popup synchronization, preserved
+selection, in-flight backup and export contents using fictional demo data, run
+`CHROME_PATH=/path/to/chrome node scripts/test-language.mjs`; it also regenerates the two language-setting
+screenshots in `docs/images/`. On Windows, set `CHROME_PATH` in your shell or use the default Chrome location.
+
+For additional languages (Bangla, Hindi, Arabic, Spanish, Portuguese, Indonesian, …), open an issue first to
+coordinate the catalog, plural/date formatting and any text-direction changes.

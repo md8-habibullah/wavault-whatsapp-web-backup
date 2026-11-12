@@ -1,48 +1,50 @@
+import { useI18n } from './i18n.js';
 import { useMemo, useRef, useState } from 'react';
 import { GROUP_COLUMNS, MEMBER_COLUMNS } from '../lib/export/columns.js';
 import { groupMembers } from '../lib/model.js';
 import { call } from '../shared/rpc-client.js';
 import ExportDock from './ExportDock.jsx';
-import { Badge, fmtDate, JobPanel, plural, useToast, VirtualTable } from './components.jsx';
+import { Badge, JobPanel, useToast, VirtualTable } from './components.jsx';
 import { useSelection } from './hooks.js';
 
 const keyOf = (g) => g.id;
 
-const TABLE_COLUMNS = [
+const TABLE_COLUMNS = (t, fmtDate) => [
   {
     id: 'subject',
-    label: 'Group',
+    label: t('Group'),
     width: 'minmax(200px, 2.2fr)',
     render: (g) => (
       <span className="wv-namecell-text">
-        <strong>{g.subject || 'Unnamed group'}</strong>
+        <strong>{g.subject || t('Unnamed group')}</strong>
         <small>{g.description ? g.description.split('\n')[0] : ''}</small>
       </span>
     ),
   },
   {
     id: 'members',
-    label: 'Members',
+    label: t('Members'),
     width: 'minmax(90px, 0.7fr)',
     className: 'wv-num',
-    render: (g) => (g.participantsLoaded ? g.participants.length.toLocaleString() : <span className="wv-muted" title="Member list not loaded yet">{g.size ? `${g.size} (not loaded)` : 'Not loaded'}</span>),
+    render: (g) => (g.participantsLoaded ? g.participants.length.toLocaleString() : <span className="wv-muted" title={t('Member list not loaded yet')}>{g.size ? t`${g.size} (not loaded)` : t('Not loaded')}</span>),
   },
   {
     id: 'role',
-    label: 'My role',
+    label: t('My role'),
     width: 'minmax(120px, 1fr)',
     render: (g) => (
       <div className="wv-badges">
-        {g.iAmAdmin ? <Badge tone="jade">Admin</Badge> : g.iAmMember ? <Badge>Member</Badge> : <Badge tone="amber">Left</Badge>}
-        {g.isCommunity && <Badge>Community</Badge>}
+        {g.iAmAdmin ? <Badge tone="jade">{t('Admin')}</Badge> : g.iAmMember ? <Badge>{t('Member')}</Badge> : <Badge tone="amber">{t('Left')}</Badge>}
+        {g.isCommunity && <Badge>{t('Community')}</Badge>}
       </div>
     ),
   },
-  { id: 'created', label: 'Created', width: 'minmax(100px, 0.9fr)', render: (g) => fmtDate(g.createdAt) },
-  { id: 'last', label: 'Last activity', width: 'minmax(100px, 0.9fr)', render: (g) => fmtDate(g.lastActivity) },
+  { id: 'created', label: t('Created'), width: 'minmax(100px, 0.9fr)', render: (g) => fmtDate(g.createdAt) },
+  { id: 'last', label: t('Last activity'), width: 'minmax(100px, 0.9fr)', render: (g) => fmtDate(g.lastActivity) },
 ];
 
 export default function GroupsView({ snapshot, index, mergeGroups }) {
+  const { t, plural, fmtDate } = useI18n();
   const toast = useToast();
   const [q, setQ] = useState('');
   const [what, setWhat] = useState('members');
@@ -85,10 +87,10 @@ export default function GroupsView({ snapshot, index, mergeGroups }) {
       const loaded = await rpc.promise;
       mergeGroups(loaded);
       const ok = loaded.filter((g) => g.participantsLoaded).length;
-      setJob((j) => ({ ...j, finished: true, result: `Loaded member lists for ${plural(ok, 'group')}.${ok < ids.length ? ` ${ids.length - ok} could not be loaded (you may have left them).` : ''}` }));
+      setJob((j) => ({ ...j, finished: true, result: t`Loaded member lists for ${plural(ok, 'group')}.${ok < ids.length ? t` ${ids.length - ok} could not be loaded (you may have left them).` : ''}` }));
     } catch (e) {
       setJob(null);
-      toast(`Could not load members: ${e.message}`, 'error');
+      toast(t`Could not load members: ${e.message}`, 'error');
     }
   };
 
@@ -96,25 +98,25 @@ export default function GroupsView({ snapshot, index, mergeGroups }) {
     <div className="wv-view">
       <div className="wv-head">
         <div className="wv-title">
-          <h2>Groups</h2>
+          <h2>{t('Groups')}</h2>
           <p>
             <span className="wv-bignum">{snapshot.groups.length.toLocaleString()}</span>
-            <span className="wv-muted">groups, {plural(snapshot.groups.reduce((n, g) => n + g.participants.length, 0), 'member entry', 'member entries')} loaded</span>
+            <span className="wv-muted">{t`groups, ${plural(snapshot.groups.reduce((n, g) => n + g.participants.length, 0), 'member entry', 'member entries')} loaded`}</span>
           </p>
         </div>
-        <input className="wv-input wv-search" type="search" placeholder="Search groups" aria-label="Search groups" value={q} onChange={(e) => setQ(e.target.value)} />
+        <input className="wv-input wv-search" type="search" placeholder={t('Search groups')} aria-label={t('Search groups')} value={q} onChange={(e) => setQ(e.target.value)} />
       </div>
 
       <div className="wv-tablecol wv-tablecol-full">
         {missing.length > 0 && (
           <div className="wv-note">
-            <span>{plural(missing.length, 'group')} {chosen.length ? 'you selected' : 'in this list'} {missing.length === 1 ? 'has' : 'have'} no member list loaded yet.</span>
+            <span>{t`Member lists not loaded: ${plural(missing.length, 'group')}`}</span>
             <button type="button" className="wv-btn wv-btn-quiet" onClick={loadMembers}>
-              Load member lists
+              {t('Load member lists')}
             </button>
           </div>
         )}
-        <VirtualTable label="Groups" rows={groups} columns={TABLE_COLUMNS} rowKey={keyOf} selected={selected} onToggle={toggle} onToggleMany={setMany} empty={q ? `No group matches "${q}".` : 'You are not in any groups.'} />
+        <VirtualTable label={t('Groups')} rows={groups} columns={TABLE_COLUMNS(t, fmtDate)} rowKey={keyOf} selected={selected} onToggle={toggle} onToggleMany={setMany} empty={q ? t`No group matches "${q}".` : t('You are not in any groups.')} />
       </div>
 
       <ExportDock
@@ -125,29 +127,29 @@ export default function GroupsView({ snapshot, index, mergeGroups }) {
         columns={what === 'members' ? MEMBER_COLUMNS : GROUP_COLUMNS}
         title={what === 'members' ? (target.length === 1 ? `group ${target[0].subject || 'members'}` : `group members ${target.length} groups`) : 'groups'}
         sheets={sheets}
-        scopeText={`${chosen.length ? `${chosen.length} selected` : 'all'} ${chosen.length === 1 ? 'group' : 'groups'}`}
+        scopeText={chosen.length ? t`${plural(chosen.length, 'group')} selected` : t`All ${plural(groups.length, 'group')} in this list`}
       >
-        <div className="wv-seg" role="radiogroup" aria-label="What to export">
+        <div className="wv-seg" role="radiogroup" aria-label={t('What to export')}>
           <button type="button" role="radio" aria-checked={what === 'members'} className={what === 'members' ? 'on' : ''} onClick={() => setWhat('members')}>
-            Members
+            {t('Members')}
           </button>
           <button type="button" role="radio" aria-checked={what === 'groups'} className={what === 'groups' ? 'on' : ''} onClick={() => setWhat('groups')}>
-            Group list
+            {t('Group list')}
           </button>
         </div>
         {what === 'members' && (
           <label className="wv-check wv-check-inline">
             <input type="checkbox" checked={unique} onChange={(e) => setUnique(e.target.checked)} />
-            <span>One row per person</span>
+            <span>{t('One row per person')}</span>
           </label>
         )}
       </ExportDock>
 
       {job && (
         <JobPanel
-          title="Loading member lists"
+          title={t('Loading member lists')}
           percent={job.total ? (job.done / job.total) * 100 : 0}
-          lines={[job.finished ? job.result : `${job.done} of ${job.total} groups`]}
+          lines={[job.finished ? job.result : t`${job.done} of ${job.total} groups`]}
           done={job.finished}
           onCancel={() => control.current?.cancel?.()}
           onClose={() => setJob(null)}

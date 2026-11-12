@@ -1,8 +1,9 @@
+import { useI18n } from './i18n.js';
 import { useState } from 'react';
 import { buildExport, FORMATS, formatById } from '../lib/export/index.js';
 import { toE164 } from '../lib/model.js';
 import { copyText, saveFile } from '../lib/download.js';
-import { MultiPick, plural, useToast } from './components.jsx';
+import { MultiPick, useToast } from './components.jsx';
 import { usePref } from './hooks.js';
 
 const GROUPS = [
@@ -23,6 +24,7 @@ const GROUPS = [
  * @param {React.ReactNode} [p.children] extra controls (scope switch etc.)
  */
 export default function ExportDock({ kind, records, scopeText, columns, title, sheets, noun, children }) {
+  const { t, plural } = useI18n();
   const toast = useToast();
   const peopleOk = kind !== 'groups';
   const [format, setFormat] = usePref(`wv.format.${kind}`, peopleOk ? 'csv' : 'xlsx');
@@ -39,13 +41,13 @@ export default function ExportDock({ kind, records, scopeText, columns, title, s
       const out = buildExport({ kind, records, columns: chosen.length ? chosen : columns.filter((c) => c.default), format: f.id, title, sheets });
       if (f.id === 'pdf') {
         await browser.runtime.sendMessage({ type: 'wavault:print-report', table: out.table });
-        toast('Report opened in a new tab. Choose "Save as PDF" in the print dialog.');
+        toast(t('Report opened in a new tab. Choose "Save as PDF" in the print dialog.'));
       } else {
         const size = saveFile(out.data, out.filename, out.mime);
-        toast(`Saved ${out.filename} (${plural(records.length, noun)}, ${(size / 1024).toFixed(size > 10240 ? 0 : 1)} KB).${out.note ? ` ${out.note}` : ''}`);
+        toast(t`Saved ${out.filename} (${plural(records.length, noun)}, ${(size / 1024).toFixed(size > 10240 ? 0 : 1)} KB).${out.note ? ` ${out.note}` : ''}`);
       }
     } catch (e) {
-      toast(`Export failed: ${e.message}`, 'error');
+      toast(t`Export failed: ${e.message}`, 'error');
     } finally {
       setBusy(false);
     }
@@ -54,7 +56,7 @@ export default function ExportDock({ kind, records, scopeText, columns, title, s
   const copyNumbers = async () => {
     const nums = [...new Set(records.map((r) => toE164(r.phone)).filter(Boolean))];
     const ok = await copyText(nums.join('\n'));
-    toast(ok ? `Copied ${plural(nums.length, 'phone number')}.` : 'Copy failed. Use the Numbers list export instead.', ok ? 'ok' : 'error');
+    toast(ok ? t`Copied ${plural(nums.length, 'phone number')}.` : t('Copy failed. Use the Numbers list export instead.'), ok ? 'ok' : 'error');
   };
 
   return (
@@ -65,15 +67,15 @@ export default function ExportDock({ kind, records, scopeText, columns, title, s
       </div>
       <div className="wv-dock-actions">
         <label className="wv-select">
-          <span className="wv-sr">Format</span>
+          <span className="wv-sr">{t('Format')}</span>
           <select value={f.id} onChange={(e) => setFormat(e.target.value)}>
             {GROUPS.map(([label, ids]) => (
-              <optgroup key={label} label={label}>
+              <optgroup key={label} label={t(label)}>
                 {ids.map((id) => {
                   const x = formatById(id);
                   return (
                     <option key={id} value={id} disabled={x.people && !peopleOk}>
-                      {x.label}: {x.hint}
+                      {t(x.label)}: {t(x.hint)}
                     </option>
                   );
                 })}
@@ -82,15 +84,15 @@ export default function ExportDock({ kind, records, scopeText, columns, title, s
           </select>
         </label>
         {usesColumns && (
-          <MultiPick label="Columns" options={columns.map((c) => ({ value: c.id, label: c.label }))} value={colIds} onChange={(v) => setColIds(v.length ? v : columns.filter((c) => c.default).map((c) => c.id))} />
+          <MultiPick label={t('Columns')} options={columns.map((c) => ({ value: c.id, label: t(c.label) }))} value={colIds} onChange={(v) => setColIds(v.length ? v : columns.filter((c) => c.default).map((c) => c.id))} />
         )}
         {peopleOk && (
           <button type="button" className="wv-btn wv-btn-quiet" onClick={copyNumbers} disabled={!records.length}>
-            Copy numbers
+            {t('Copy numbers')}
           </button>
         )}
         <button type="button" className="wv-btn wv-btn-primary" onClick={run} disabled={!records.length || busy || (f.people && !peopleOk)}>
-          {busy ? 'Exporting…' : `Export ${plural(records.length, noun)}`}
+          {busy ? t('Exporting…') : t`Export ${plural(records.length, noun)}`}
         </button>
       </div>
     </div>

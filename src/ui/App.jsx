@@ -1,3 +1,4 @@
+import { LanguageProvider, useI18n } from './i18n.js';
 import { useEffect, useState } from 'react';
 import ContactsView from './ContactsView.jsx';
 import GroupsView from './GroupsView.jsx';
@@ -36,11 +37,12 @@ function Logo({ size = 28 }) {
 }
 
 function Waiting({ status }) {
+  const { t } = useI18n();
   const text = {
-    connecting: ['Connecting to WhatsApp Web', 'This takes a moment after the page loads.'],
-    loading: ['WhatsApp is still loading', 'Your chats are downloading. WAVault opens as soon as they are ready.'],
-    'logged-out': ['Log in to WhatsApp Web first', 'Scan the QR code with WhatsApp on your phone, then come back here.'],
-  }[status.state] || ['Connecting', ''];
+    connecting: [t('Connecting to WhatsApp Web'), t('This takes a moment after the page loads.')],
+    loading: [t('WhatsApp is still loading'), t('Your chats are downloading. WAVault opens as soon as they are ready.')],
+    'logged-out': [t('Log in to WhatsApp Web first'), t('Scan the QR code with WhatsApp on your phone, then come back here.')],
+  }[status.state] || [t('Connecting'), ''];
   return (
     <div className="wv-waiting">
       {status.state !== 'logged-out' && <div className="wv-spinner" aria-hidden="true" />}
@@ -51,34 +53,44 @@ function Waiting({ status }) {
 }
 
 function Settings({ theme, setTheme, launcher, setLauncher }) {
+  const { t, preference, setLanguage } = useI18n();
   const [open, setOpen] = useState(false);
   return (
     <div className="wv-settings">
       <button type="button" className="wv-rail-btn" aria-expanded={open} onClick={() => setOpen((o) => !o)}>
-        Settings
+        {t('Settings')}
       </button>
       {open && (
-        <div className="wv-pop wv-pop-up" role="dialog" aria-label="Settings">
+        <div className="wv-pop wv-pop-up" role="dialog" aria-label={t('Settings')}>
           <label className="wv-field">
-            <span>Theme</span>
+            <span>{t('Language')}</span>
+            <select className="wv-input" value={preference} onChange={(e) => setLanguage(e.target.value)} aria-label={t('Language')}>
+              <option value="auto">{t('Follow browser')}</option>
+              <option value="en" lang="en">English</option>
+              <option value="zh-CN" lang="zh-CN">简体中文</option>
+            </select>
+          </label>
+          <label className="wv-field">
+            <span>{t('Theme')}</span>
             <select className="wv-input" value={theme} onChange={(e) => setTheme(e.target.value)}>
-              <option value="auto">Match WhatsApp</option>
-              <option value="light">Light</option>
-              <option value="dark">Dark</option>
+              <option value="auto">{t('Match WhatsApp')}</option>
+              <option value="light">{t('Light')}</option>
+              <option value="dark">{t('Dark')}</option>
             </select>
           </label>
           <label className="wv-check">
             <input type="checkbox" checked={launcher} onChange={(e) => setLauncher(e.target.checked)} />
-            <span>Show the WAVault button on WhatsApp</span>
+            <span>{t('Show the WAVault button on WhatsApp')}</span>
           </label>
-          <p className="wv-muted wv-small">WAVault only reads data already in this browser tab. Nothing is uploaded; files are saved by your browser.</p>
+          <p className="wv-muted wv-small">{t('WAVault only reads data already in this browser tab. Nothing is uploaded; files are saved by your browser.')}</p>
         </div>
       )}
     </div>
   );
 }
 
-export default function App() {
+function Dashboard() {
+  const { t, language } = useI18n();
   const [open, setOpen] = useState(() => /^#wavault/.test(location.hash));
   const [view, setView] = useState(() => /^#wavault=(\w+)/.exec(location.hash)?.[1] || 'contacts');
   const [theme, setTheme] = usePref('wv.theme', 'auto');
@@ -106,9 +118,9 @@ export default function App() {
 
   return (
     <ToastProvider>
-      <div className="wv-root" data-theme={dark ? 'dark' : 'light'}>
+      <div className="wv-root" lang={language} data-theme={dark ? 'dark' : 'light'}>
         {!open && launcher && (
-          <button type="button" className="wv-launcher" onClick={() => setOpen(true)} aria-label="Open WAVault backup" title="WAVault backup">
+          <button type="button" className="wv-launcher" onClick={() => setOpen(true)} aria-label={t('Open WAVault backup')} title={t('WAVault backup')}>
             <Logo size={34} />
           </button>
         )}
@@ -127,10 +139,10 @@ export default function App() {
                 <Logo />
                 <span>WAVault</span>
               </div>
-              <nav className="wv-tabs" aria-label="Sections">
+              <nav className="wv-tabs" aria-label={t('Sections')}>
                 {VIEWS.map((v) => (
                   <button key={v.id} type="button" className={view === v.id ? 'on' : ''} aria-current={view === v.id ? 'page' : undefined} onClick={() => setView(v.id)}>
-                    <span>{v.label}</span>
+                    <span>{t(v.id === 'status' ? 'Status updates' : v.label)}</span>
                     {counts[v.id] != null && <span className="wv-num">{counts[v.id].toLocaleString()}</span>}
                   </button>
                 ))}
@@ -138,24 +150,24 @@ export default function App() {
               <div className="wv-rail-foot">
                 {snapshot && (
                   <button type="button" className="wv-rail-btn" onClick={refresh} disabled={loading}>
-                    {loading ? 'Refreshing…' : 'Refresh data'}
+                    {loading ? t('Refreshing…') : t('Refresh data')}
                   </button>
                 )}
                 <Settings theme={theme} setTheme={setTheme} launcher={launcher} setLauncher={setLauncher} />
                 <button type="button" className="wv-rail-btn" onClick={() => setOpen(false)}>
-                  Close
+                  {t('Close')}
                 </button>
-                {status.version && <small className="wv-muted">WhatsApp {status.version}</small>}
+                {status.version && <small className="wv-muted">{t('WhatsApp')} {status.version}</small>}
               </div>
             </aside>
             <main className="wv-main">
               {!ready && <Waiting status={status} />}
               {ready && error && (
                 <div className="wv-waiting">
-                  <h2>Could not read WhatsApp data</h2>
+                  <h2>{t('Could not read WhatsApp data')}</h2>
                   <p className="wv-muted">{error}</p>
                   <button type="button" className="wv-btn wv-btn-primary" onClick={refresh}>
-                    Try again
+                    {t('Try again')}
                   </button>
                 </div>
               )}
@@ -179,4 +191,8 @@ export default function App() {
       </div>
     </ToastProvider>
   );
+}
+
+export default function App() {
+  return <LanguageProvider><Dashboard /></LanguageProvider>;
 }

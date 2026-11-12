@@ -1,4 +1,6 @@
 // Minimal stand-in for the WebExtension `browser` API so the dashboard runs as a normal web page (demo only).
+const storageListeners = new Set();
+const notifyStorage = (changes) => { for (const listener of storageListeners) listener(changes, 'local'); };
 const store = {
   async get(key) {
     try {
@@ -10,15 +12,24 @@ const store = {
   },
   async set(obj) {
     try {
-      for (const [k, v] of Object.entries(obj)) localStorage.setItem(`wv-demo:${k}`, JSON.stringify(v));
+      for (const [k, v] of Object.entries(obj)) {
+        const oldValue = JSON.parse(localStorage.getItem(`wv-demo:${k}`) ?? 'null');
+        localStorage.setItem(`wv-demo:${k}`, JSON.stringify(v));
+        notifyStorage({ [k]: { oldValue, newValue: v } });
+      }
     } catch {
       /* private mode */
     }
   },
 };
 
+window.addEventListener('storage', (event) => {
+  if (event.key?.startsWith('wv-demo:')) notifyStorage({ [event.key.slice(8)]: { newValue: event.newValue == null ? undefined : JSON.parse(event.newValue) } });
+});
+
 globalThis.browser = {
-  storage: { local: store },
+  storage: { local: store, onChanged: { addListener: fn => storageListeners.add(fn), removeListener: fn => storageListeners.delete(fn) } },
+  tabs: { async query() { return [{ id: 1 }]; } },
   runtime: {
     getURL: (p) => p,
     onMessage: { addListener() {}, removeListener() {} },
